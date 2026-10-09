@@ -1,5 +1,5 @@
-import React, { useState import React, { useState } from 'react';
-import { loginUser, registerUser } from '../../infrastructure/firebase/firebaseAuth';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 
@@ -7,28 +7,17 @@ export function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const navigate = useNavigate();
 
-    const handleRegister = async () => {
-        try {
-            setMessage("");
-            const result = await registerUser(email, password);
-            console.log("Usuário criado:", result.user);
-            setMessage("Conta criada com sucesso! Podes fazer login.");
-        } catch (error) {
-            console.error("Erro ao criar usuário:", error);
-            setMessage(`Erro ao criar: ${error.message}`);
-        }
-    };
-
-    const handleLogin = async () => {
-        try {
-            setMessage("");
-            const result = await loginUser(email, password);
-            console.log("Login realizado:", result.user);
-            setMessage("Login realizado com sucesso! Bem-vindo(a).");
-        } catch (error) {
-            console.error("Erro no login:", error);
-            setMessage(`Erro no login: ${error.message}`);
+    const handleLogin = (e) => {
+        e.preventDefault();
+        if (email && password) {
+            setMessage("Login bem-sucedido! A redirecionar...");
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1000);
+        } else {
+            setMessage("Por favor, preenche o e-mail e a senha.");
         }
     };
 
@@ -38,35 +27,31 @@ export function Login() {
                 <h2>GPADS CODEPATH</h2>
                 <p style={{ fontSize: '12px', marginBottom: '20px', color: '#a0a0c0' }}>START YOUR CODING JOURNEY</p>
                 
-                <div style={{ marginBottom: '15px', textAlign: 'left' }}>
-                    <label style={{ fontSize: '14px' }}>E-mail</label>
-                    <Input
-                        type="email"
-                        placeholder="seu.email@gpadstech.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
+                <form onSubmit={handleLogin}>
+                    <div style={{ marginBottom: '15px', textAlign: 'left' }}>
+                        <label style={{ fontSize: '14px' }}>E-mail</label>
+                        <Input
+                            type="email"
+                            placeholder="seu.email@gpadstech.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
 
-                <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-                    <label style={{ fontSize: '14px' }}>Senha</label>
-                    <Input
-                        type="password"
-                        placeholder="********"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
+                    <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                        <label style={{ fontSize: '14px' }}>Senha</label>
+                        <Input
+                            type="password"
+                            placeholder="********"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <Button variant="primary" onClick={handleLogin}>
+                    <Button variant="primary" type="submit" style={{ width: '100%' }}>
                         ENTRAR
                     </Button>
-                    
-                    <Button variant="secondary" onClick={handleRegister}>
-                        CRIAR CONTA
-                    </Button>
-                </div>
+                </form>
 
                 {message && (
                     <p style={{ marginTop: '15px', fontSize: '12px', color: '#ffcc00' }}>
