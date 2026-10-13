@@ -1949,16 +1949,16 @@ O backend deve ser responsável por esconder esses detalhes.
 * [x] Validação do usuário no Firebase Console
 * [x] `.env`
 * [x] `.env.example`
+* [x] Entities
+* [x] Repositories
+* [x] Services
+* [x] API Client (escrito; ainda não validado contra o backend)
+* [x] Mocks
 
 ## Em desenvolvimento
 
 * [ ] `useAuth.js`
 * [ ] `ProtectedRoute.jsx`
-* [ ] Entities
-* [ ] Repositories
-* [ ] Services
-* [ ] API Client
-* [ ] Mocks
 * [ ] Componentes definitivos
 * [ ] Dashboard
 * [ ] Ranking
