@@ -1,49 +1,56 @@
+import { auth } from "../firebase/firebaseConfig.js";
+
+// URL base da API, vinda do arquivo .env (VITE_API_URL).
+// O Vite só expõe variáveis que começam com VITE_.
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 /**
- * Cliente HTTP central da aplicação.
+ * Cliente HTTP central do frontend.
  *
- * Responsável por realizar chamadas à API do backend.
+ * Todas as chamadas à API passam por aqui, então só existe
+ * UM lugar que sabe: a URL base, o token de autenticação
+ * e como tratar erros de resposta.
  *
- * Todas as requisições passam por este arquivo para manter
- * um único padrão de comunicação com o backend.
- *
- * O token Firebase é enviado no cabeçalho Authorization
- * quando existe um usuário autenticado.
+ * Responsabilidade: fazer a requisição, enviar o Firebase ID Token
+ * no header Authorization e devolver o JSON da resposta.
  */
+export class ApiClient {
 
-import { auth } from "../firebase/firebaseAuth";
+    // Monta os headers de toda requisição.
+    async buildHeaders() {
+        const headers = { "Content-Type": "application/json" };
 
-const API_URL = import.meta.env.VITE_API_URL;
+        // currentUser é o usuário logado no Firebase (ou null).
+        const user = auth.currentUser;
 
-export async function apiRequest(endpoint, options = {}) {
+        if (user) {
+            // Pede o ID Token ao Firebase (ele renova sozinho se expirou).
+            const token = await user.getIdToken();
 
-    const user = auth.currentUser;
-
-    const token = user
-        ? await user.getIdToken()
-        : null;
-
-    const headers = {
-        "Content-Type": "application/json",
-        ...options.headers,
-    };
-
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(
-        `${API_URL}${endpoint}`,
-        {
-            ...options,
-            headers,
+            // Formato exigido: "Bearer " + token.
+            headers.Authorization = `Bearer ${token}`;
         }
-    );
 
-    if (!response.ok) {
-        throw new Error(
-            `Erro na API: ${response.status}`
-        );
+        return headers;
     }
 
-    return response.json();
+    // Faz um GET no caminho informado (ex.: "/users/123").
+    async get(path) {
+        const response = await fetch(`${BASE_URL}${path}`, {
+            method: "GET",
+            headers: await this.buildHeaders(),
+        });
+
+        // fetch NÃO lança erro em 404 ou 500; precisamos checar
+        // response.ok (true para status 200 a 299) e lançar nós mesmas.
+        if (!response.ok) {
+            const error = new Error(`Erro na requisição: ${response.status}`);
+            // Guarda o status para o tratamento de 400/401/403/404/500
+            // previsto para o dia 24/10.
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    }
 }
