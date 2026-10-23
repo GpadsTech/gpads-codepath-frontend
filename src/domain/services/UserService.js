@@ -41,4 +41,14 @@ export class UserService {
             throw erro;
         }
     }
+        // Busca o perfil do usuário logado (GET /auth/me/).
+    async getMe() {
+        try {
+            const data = await this.userRepository.getMe();
+            return new User(data);
+        } catch (erro) {
+            console.error(erro);
+            throw erro;
+        }
+    }
 }

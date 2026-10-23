@@ -1,38 +1,22 @@
 /**
- * Entidade responsável por representar um usuário
- * dentro do sistema gamificado.
+ * Entidade que representa um usuário do sistema gamificado.
  *
- * Contém os dados e comportamentos relacionados
- * à evolução do usuário.
+ * Atributos (vindos do backend): id, uid, name, email, role,
+ * points, level, cellId.
  *
- * Atributos:
- *  - id:     identificador único do usuário
- *  - name:   nome do usuário
- *  - email:  e-mail do usuário
- *  - points: pontuação acumulada (começa em 0)
- *  - level:  nível atual (começa em 1)
- *
- * Comportamentos:
- *  - addPoints: soma pontos à pontuação do usuário
- *
- * Responsabilidade: guardar os dados do usuário e as regras
- * ligadas à evolução dele. Não sabe nada de API ou Firebase.
- *
- * Observação: a regra de cálculo de nível será definida
- * na Sprint 2, junto com o backend.
+ * Observação: pontos e nível são calculados pelo backend.
+ * O frontend apenas exibe, sem recalcular.
  */
 export class User {
 
     constructor(data) {
         this.id = data.id;
+        this.uid = data.uid;
         this.name = data.name;
         this.email = data.email;
+        this.role = data.role;
         this.points = data.points ?? 0;
         this.level = data.level ?? 1;
+        this.cellId = data.cellId; // pode estar ausente
     }
-
-    addPoints(points) {
-        this.points += points;
-    }
-
 }

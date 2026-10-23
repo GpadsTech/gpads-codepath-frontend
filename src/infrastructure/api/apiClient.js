@@ -35,22 +35,45 @@ export class ApiClient {
     }
 
     // Faz um GET no caminho informado (ex.: "/users/123").
-    async get(path) {
-        const response = await fetch(`${BASE_URL}${path}`, {
-            method: "GET",
-            headers: await this.buildHeaders(),
-        });
+    // Faz a requisição e trata o envelope de resposta do backend.
+    async request(method, path, body) {
+        const options = { method, headers: await this.buildHeaders() };
 
-        // fetch NÃO lança erro em 404 ou 500; precisamos checar
-        // response.ok (true para status 200 a 299) e lançar nós mesmas.
-        if (!response.ok) {
-            const error = new Error(`Erro na requisição: ${response.status}`);
-            // Guarda o status para o tratamento de 400/401/403/404/500
-            // previsto para o dia 24/10.
-            error.status = response.status;
+        if (body !== undefined) {
+            options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(`${BASE_URL}${path}`, options);
+
+        // Se a resposta não for JSON válido, json fica null.
+        let json = null;
+        try {
+            json = await response.json();
+        } catch {
+            json = null;
+        }
+
+        if (!response.ok || json?.success === false) {
+            const error = new Error(
+                json?.error?.message ?? `Erro na requisição: ${response.status}`
+            );
+            error.status = response.status;   // 400, 401, 403, 404, 500...
+            error.code = json?.error?.code;   // ex.: FORBIDDEN, USER_NOT_FOUND
             throw error;
         }
 
-        return await response.json();
+        return json?.data;
+    }
+
+    get(path) {
+        return this.request("GET", path);
+    }
+
+    post(path, body) {
+        return this.request("POST", path, body);
+    }
+
+    patch(path, body) {
+        return this.request("PATCH", path, body);
     }
 }

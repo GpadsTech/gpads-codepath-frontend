@@ -1,20 +1,19 @@
 import { ApiClient } from "./apiClient.js";
 
-/**
- * Comunicação HTTP relacionada a usuários.
- * Só sabe QUAL endpoint chamar; como fazer a chamada
- * (URL base, token, erros) é com o ApiClient.
- */
-export class userApi {
+/** Comunicação HTTP relacionada a usuários. */
+export class UserApi {
 
-    // O valor padrão cria um ApiClient se ninguém passar um.
-    // Passar um client falso facilita testes.
     constructor(client = new ApiClient()) {
         this.client = client;
     }
 
-    // GET /users/{id}  (validar com o API_CONTRACT.md)
+    // GET /api/auth/me/  (perfil do usuário logado)
+    async getMe() {
+        return this.client.get("/auth/me/");
+    }
+
+    // GET /api/users/{userId}/
     async getById(id) {
-        return this.client.get(`/users/${id}`);
+        return this.client.get(`/users/${id}/`);
     }
 }

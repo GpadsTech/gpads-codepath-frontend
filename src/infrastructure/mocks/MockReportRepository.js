@@ -1,28 +1,39 @@
 import { ReportRepository } from "../../domain/repositories/ReportRepository.js";
 
-/**
- * Implementação falsa do ReportRepository.
- *
- * O campo "data" é provisório: o formato real depende do
- * que o backend vai oferecer (validar com o API_CONTRACT.md).
- */
+/** Implementação falsa do ReportRepository (formato do backend). */
 export class MockReportRepository extends ReportRepository {
 
-    async getByUserId(userId) {
+    async getAll() {
         return [
             {
-                id: "1",
-                title: "Semana 1",
-                startDate: "2026-10-05",
-                endDate: "2026-10-11",
-                data: { pointsEarned: 200, challengesCompleted: 3 },
+                id: "r1",
+                studentId: "uid-1",
+                challengeId: "c1",
+                cellId: "aplicacoes",
+                description: "Entrega do ranking",
+                report: "Texto do relatório",
+                code: "",
+                status: "EVALUATED",
+                submittedAt: "2026-10-19T22:00:00Z",
+                revision: 1,
+                history: [],
+                evaluation: { decision: "approve", points: 85, feedback: "Bom trabalho" },
+                github: null,
             },
             {
-                id: "2",
-                title: "Semana 2",
-                startDate: "2026-10-12",
-                endDate: "2026-10-18",
-                data: { pointsEarned: 150, challengesCompleted: 2 },
+                id: "r2",
+                studentId: "uid-1",
+                challengeId: "c2",
+                cellId: "aplicacoes",
+                description: "Entrega do dashboard",
+                report: "Texto",
+                code: "",
+                status: "REJECTED",
+                submittedAt: "2026-10-20T10:00:00Z",
+                revision: 1,
+                history: [],
+                evaluation: { decision: "reject", feedback: "Inclua os testes e reenvie." },
+                github: null,
             },
         ];
     }

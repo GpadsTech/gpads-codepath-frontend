@@ -2,18 +2,17 @@ import { RankingRepository } from "../../domain/repositories/RankingRepository.j
 
 /**
  * Implementação falsa do RankingRepository.
- *
- * Os dados estão PROPOSITALMENTE fora de ordem, para provar
- * que o RankingService ordena por pontos e preenche a position.
+ * Como o backend, já devolve ordenado e com position.
+ * Note o empate: posições 1, 1, 3.
  */
 export class MockRankingRepository extends RankingRepository {
 
-    async getRanking() {
+    async getRanking(period = "all") {
         return [
-            { userId: "1", name: "João", points: 700 },
-            { userId: "2", name: "Maria", points: 1200 },
-            { userId: "3", name: "Alane", points: 850 },
-            { userId: "4", name: "Samara", points: 950 },
+            { position: 1, userId: "2", name: "Maria", points: 1200, level: 12 },
+            { position: 1, userId: "4", name: "Samara", points: 1200, level: 12 },
+            { position: 3, userId: "3", name: "Alane", points: 850, level: 8 },
+            { position: 4, userId: "1", name: "João", points: 700, level: 7 },
         ];
     }
 }

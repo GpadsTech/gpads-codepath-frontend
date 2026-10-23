@@ -1,35 +1,46 @@
 /**
- * Entidade responsável por representar um relatório
- * dentro do sistema gamificado.
+ * Entidade que representa uma entrega (report) de uma atividade.
  *
- * Um relatório é um resumo da participação do usuário em
- * determinado período. Alimenta as telas de relatórios
- * (ReportCard, ReportChart e ReportFilters).
+ * Atributos: id, studentId, challengeId, cellId, description,
+ * report, code, status, submittedAt, revision, history,
+ * evaluation e github.
  *
- * Atributos:
- *  - id:        identificador único do relatório
- *  - title:     título do relatório
- *  - startDate: início do período
- *  - endDate:   fim do período
- *  - data:      dados do resumo (formato a definir com a API)
+ * Status possíveis: PENDING_EVALUATION, EVALUATED, REJECTED.
  *
- * Comportamentos (previstos para a Sprint 2):
- *  - filtrar por período
- *  - calcular totais
- *
- * Responsabilidade: guardar os dados de um relatório.
- *
- * Observação: é a entidade mais incerta, porque depende de quais
- * relatórios o backend vai oferecer. Campos provisórios.
+ * Comportamentos: isPending, isEvaluated, isRejected e
+ * canResubmit (só entregas devolvidas podem ser reenviadas).
  */
 export class Report {
 
     constructor(data) {
         this.id = data.id;
-        this.title = data.title;
-        this.startDate = data.startDate;
-        this.endDate = data.endDate;
-        this.data = data.data ?? {};
+        this.studentId = data.studentId;
+        this.challengeId = data.challengeId;
+        this.cellId = data.cellId;
+        this.description = data.description;
+        this.report = data.report ?? "";
+        this.code = data.code ?? "";
+        this.status = data.status;
+        this.submittedAt = data.submittedAt;
+        this.revision = data.revision ?? 1;
+        this.history = data.history ?? [];
+        this.evaluation = data.evaluation ?? null;
+        this.github = data.github ?? null;
     }
 
+    isPending() {
+        return this.status === "PENDING_EVALUATION";
+    }
+
+    isEvaluated() {
+        return this.status === "EVALUATED";
+    }
+
+    isRejected() {
+        return this.status === "REJECTED";
+    }
+
+    canResubmit() {
+        return this.isRejected();
+    }
 }

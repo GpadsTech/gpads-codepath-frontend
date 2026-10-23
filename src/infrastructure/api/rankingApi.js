@@ -7,8 +7,8 @@ export class RankingApi {
         this.client = client;
     }
 
-    // GET /ranking  (validar com o API_CONTRACT.md)
-    async getRanking() {
-        return this.client.get("/ranking");
+    // GET /api/ranking/?period=all|week
+    async getRanking(period = "all") {
+        return this.client.get(`/ranking/?period=${period}`);
     }
 }
