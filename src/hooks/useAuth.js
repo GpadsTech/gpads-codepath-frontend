@@ -1,19 +1,9 @@
-/**
- * Hook responsável por disponibilizar o estado de autenticação
- * para os componentes React.
- *
- * Ele observa o Firebase Authentication e informa se existe
- * um usuário autenticado.
- */
-
 import { useEffect, useState } from "react";
-
 import {
-    auth,
-    login,
-    logout,
+    loginUser as login,
+    logoutUser as logout,
     observeAuthState,
-} from "../infrastructure/firebase/firebaseAuth";
+} from "../infrastructure/firebase/firebaseAuth.js";
 
 export function useAuth() {
     const [user, setUser] = useState(null);
