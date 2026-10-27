@@ -19,7 +19,6 @@ export function Sidebar() {
       <a href="/ranking" style={{ color: '#a0a0c0', textDecoration: 'none', padding: '10px', borderRadius: '4px' }}>Ranking</a>
       <a href="/avatar" style={{ color: '#a0a0c0', textDecoration: 'none', padding: '10px', borderRadius: '4px' }}>Avatar</a>
       <a href="/reports" style={{ color: '#a0a0c0', textDecoration: 'none', padding: '10px', borderRadius: '4px' }}>Relatórios</a>
-      <a href="/profile" style={{ color: '#a0a0c0', textDecoration: 'none', padding: '10px', borderRadius: '4px' }}>Perfil</a>
     </aside>
   );
 }
