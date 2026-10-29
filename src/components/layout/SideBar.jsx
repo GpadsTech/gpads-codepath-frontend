@@ -1,0 +1,4 @@
+import React from 'react';
+import {NavLink} from 'react-router-dom';
+import {useAuth} from '../../hooks/useAuth';
+export function Sidebar(){const {user}=useAuth();const links=[['/dashboard','◈','Início'],['/ranking','◇','Ranking'],['/avatar','▧','Meu avatar'],['/reports','▤','Relatórios'],...(user?.role==='leader'?[['/users','⊕','Cadastrar usuários']]:[]),['/profile','○','Meu perfil']];return <aside className="cp-sidebar"><div className="cp-brand">GPADS<span>CODEPATH</span><small>EVOLUA A CADA ENTREGA</small></div><p className="cp-nav-label">SUA JORNADA</p><nav>{links.map(([to,icon,label])=><NavLink key={to} to={to} className={({isActive})=>isActive?'active':''}><span>{icon}</span>{label}</NavLink>)}</nav><div className="cp-sidebar-footer"><span className="cp-badge">{user?.role==='leader'?'LÍDER DE CÉLULA':'CODEPATH'}</span><p>Um passo de cada vez.<br/>Uma conquista por entrega.</p></div></aside>}

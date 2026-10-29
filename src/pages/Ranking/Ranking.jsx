@@ -1,0 +1,4 @@
+import React from 'react';
+import {useRanking} from '../../hooks/useRanking';
+export function Ranking(){const {ranking,loading,error}=useRanking('all');return <div className="cp-page"><p className="cp-eyebrow">CADA ENTREGA CONTA</p><h2>Ranking geral</h2><p className="cp-muted">Acompanhe os pontos conquistados nas entregas avaliadas.</p><section className="cp-panel">{loading?<p>Carregando ranking...</p>:error?<p role="alert">{error.message}</p>:ranking.length?<div className="cp-table-scroll"><table className="cp-table"><thead><tr><th>Posição</th><th>Participante</th><th>Nível</th><th>Pontos</th></tr></thead><tbody>{ranking.map(r=><tr key={r.userId}><td><span className="cp-badge">#{r.position}</span></td><td>{r.name}</td><td>{r.level}</td><td>{r.points} pts</td></tr>)}</tbody></table></div>:<p className="cp-muted">Nenhum participante no ranking ainda.</p>}</section></div>}
+export default Ranking;

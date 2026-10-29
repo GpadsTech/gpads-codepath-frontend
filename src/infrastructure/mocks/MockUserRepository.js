@@ -1,18 +1,22 @@
-/**
- * Repositório temporário utilizado durante o desenvolvimento
- * enquanto o endpoint real ainda não está disponível.
- */
+import { UserRepository } from "../../domain/repositories/UserRepository.js";
 
-export class MockUserRepository {
+/** Implementação falsa do UserRepository (formato do backend). */
+export class MockUserRepository extends UserRepository {
+
+    async getMe() {
+        return this.getById("1");
+    }
 
     async getById(id) {
-
         return {
             id,
-            name: "Usuário Teste",
-            email: "teste@gpads.com",
+            uid: "uid-" + id,
+            name: "Maria",
+            email: "maria@email.com",
+            role: "student",
             points: 850,
             level: 8,
+            cellId: "aplicacoes",
         };
     }
 }
