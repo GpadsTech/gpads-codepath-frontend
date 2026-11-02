@@ -1,139 +1,56 @@
-import { useEffect, useState } from "react";
-import {
-  loginUser,
-  registerUser,
-  logoutUser,
-  observeAuthState,
-} from "./infrastructure/firebase/firebaseAuth";
+import React from 'react';
+// Componentes essenciais do React Router Dom para navegação e proteção
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
-  const [message, setMessage] = useState("");
+// Importação das Páginas do Projeto
+import { Login } from './pages/Login/Login';
+import { DefaultLayout } from './components/layout/DefaultLayout';
+import { Dashboard } from './pages/Dashboard/Dashboard';
+import { Ranking } from './pages/Ranking/Ranking';
+import { Avatar } from './pages/Avatar/Avatar';
+import { Reports } from './pages/Reports/Reports';
+import { Users } from './pages/Users/Users';
+import { Profile } from './pages/Profile/Profile';
 
-  // Observa se existe usuário autenticado
-  useEffect(() => {
-    const unsubscribe = observeAuthState((currentUser) => {
-      setUser(currentUser);
-    });
+// Importação do nosso Guardião de Rotas
+import ProtectedRoute from "./app/routes/ProtectedRoute";
 
-    return unsubscribe;
-  }, []);
-
-  const handleRegister = async () => {
-    try {
-      setMessage("");
-
-      const result = await registerUser(email, password);
-
-      console.log("Usuário criado:", result.user);
-
-      setMessage("Usuário criado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-
-      setMessage(`Erro: ${error.message}`);
-    }
-  };
-
-  const handleLogin = async () => {
-    try {
-      setMessage("");
-
-      const result = await loginUser(email, password);
-
-      console.log("Login realizado:", result.user);
-
-      setMessage("Login realizado com sucesso!");
-    } catch (error) {
-      console.error("Erro no login:", error);
-
-      setMessage(`Erro: ${error.message}`);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-
-      setMessage("Logout realizado.");
-    } catch (error) {
-      console.error("Erro no logout:", error);
-
-      setMessage(`Erro: ${error.message}`);
-    }
-  };
-
+export function App() {
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>GPADS — Teste Firebase</h1>
+    <Router>
+      <Routes>
+        {/* ==========================================
+            1. ROTA PÚBLICA (Tela de Autenticação/Login)
+           ========================================== */}
+        <Route path="/" element={<Login />} />
 
-      {user ? (
-        <div>
-          <h2>Usuário autenticado ✅</h2>
+        {/* ==========================================
+            2. ROTAS PROTEGIDAS (Exigem Login Ativo)
+           ========================================== */}
+        {/* O 'element={<ProtectedRoute />}' vai interceptar todas as rotas filhas abaixo.
+            Se o usuário não estiver logado, ele é ejetado imediatamente para o '/' */}
+        <Route element={<ProtectedRoute />}>
 
-          <p>
-            <strong>E-mail:</strong> {user.email}
-          </p>
+          {/* Todas as páginas aqui dentro compartilham a Sidebar e o Header (DefaultLayout) */}
+          <Route element={<DefaultLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/ranking" element={<Ranking />} />
+            <Route path="/avatar" element={<Avatar />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
 
-          <p>
-            <strong>UID:</strong> {user.uid}
-          </p>
+        </Route>
 
-          <button onClick={handleLogout}>
-            Sair
-          </button>
-        </div>
-      ) : (
-        <div style={{ maxWidth: "400px" }}>
-          <h2>Login</h2>
-
-          <input
-            type="email"
-            placeholder="E-mail"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          />
-
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          />
-
-          <button onClick={handleLogin}>
-            Entrar
-          </button>
-
-          <button
-            onClick={handleRegister}
-            style={{ marginLeft: "10px" }}
-          >
-            Criar conta
-          </button>
-        </div>
-      )}
-
-      {message && (
-        <p style={{ marginTop: "20px" }}>
-          {message}
-        </p>
-      )}
-    </div>
+        {/* ==========================================
+            3. TRATAMENTO DE ERROS DE ROTA (Catch-All)
+           ========================================== */}
+        {/* Qualquer URL inválida ou tentativa de acesso maliciosa (ex: /login/ranking)
+            é redirecionada para a tela inicial */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 
