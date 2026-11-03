@@ -19,7 +19,7 @@
 }
 ```
 
-O papel oficial de estudante/membro é student. O servidor também reconhece user em dados antigos. Somente leader pode acessar o cadastro novo; ele não permite criar admin, evaluator ou outro líder. A nova conta recebe cellId de uma célula liderada por quem cadastrou. Senhas vão apenas para o Firebase Authentication; não são gravadas nos perfis ou respostas da API.
+O papel oficial de estudante/membro é student. O servidor também reconhece user em dados antigos. Admins e avaliadores podem cadastrar contas admin ou student nas sete células do catálogo /api/cells/. Líderes continuam podendo cadastrar apenas estudantes nas células de ledCellIds. Novas contas admin recebem ledCellIds com a célula escolhida e publicationTargets limitado a cells/ID-da-celula em GpadsTech/gpads-os-test; o repositório também precisa estar autorizado no Render. Senhas vão apenas para o Firebase Authentication; não são gravadas nos perfis ou respostas da API.
 
 5. O líder entra no CodePath > Cadastrar usuários e preenche Nome, E-mail, Senha (mínimo 8 caracteres), Tipo de usuário: Estudante / membro. Havendo várias células, escolhe uma delas.
 6. Para permitir entregas, crie ao menos um desafio ativo em challenges (o ID do documento é o identificador do desafio):
@@ -44,7 +44,7 @@ Crie um token com Contents: Read and write nos repositórios escolhidos e autori
 
 O repositório precisa constar tanto em GITHUB_ALLOWED_REPOSITORIES do servidor quanto em publicationTargets do perfil do líder. Cada valor de publicationTargets é uma lista de pastas base autorizadas. O líder seleciona o repositório e informa a pasta base ou uma subpasta dela na avaliação. Para liberar outro repositório GpadsTech, atualize as duas configurações.
 
-Destino final: pasta-base/UID-do-estudante/ID-da-entrega/report.md e code.txt. O relatório inclui a data de construção informada pelo estudante, o UID e a data de envio. O UID evita confundir estudantes com nomes iguais. Arquivos existentes com conteúdo diferente não são sobrescritos. Uma publicação incompleta pode ser retomada sem duplicar pontos.
+Novas publicações: pasta-base/nome-do-autor/ano/data-hora-do-envio/relatorio_quinzenal_nome-do-autor_dd_mm_aaaa.md e codigo_nome-do-autor_dd_mm_aaaa.txt. Os nomes são normalizados sem acentos ou separadores de caminho. A data usa America/Sao_Paulo e vem de submittedAt; a data de construção permanece no texto. O nome do autor fica congelado na aprovação. Publicações antigas sem layoutVersion=2 preservam seus caminhos originais, inclusive em novas tentativas. O relatório inclui a data de construção informada pelo estudante, o UID e a data de envio. O horário do envio, com microssegundos, separa entregas no mesmo dia; conflitos de conteúdo continuam impedindo sobrescrita. Arquivos existentes com conteúdo diferente não são sobrescritos. Uma publicação incompleta pode ser retomada sem duplicar pontos.
 
 ## 3. Backend no Render
 
@@ -109,7 +109,7 @@ Nesta entrega, as duas chamadas reais de teste foram usadas com o modelo 2.5 e f
 ## 6. Verificação após deploy
 
 - Abra /api/health/ e confirme status ok.
-- Entre como líder e cadastre um estudante; confirme que estudantes não veem nem acessam /users.
+- Entre como líder e cadastre um estudante; confirme que estudantes não veem nem acessam /users. Teste também admin e evaluator cadastrando os tipos admin/student e selecionando uma das sete células.
 - Entre com o novo estudante e escolha um avatar. Recarregue e confira a persistência.
 - Envie relatório e código com desafio e data de construção.
 - Como líder, solicite revisão ou aprove com feedback, pontos, repositório e pasta.
