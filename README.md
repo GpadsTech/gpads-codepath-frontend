@@ -1,6 +1,6 @@
 # GPADS CodePath Frontend
 
-React + Vite. Dashboard, ranking, relatórios quinzenais, avaliação e publicação por líderes, perfil e seis avatares pixel art selecionáveis. Cadastro de estudantes/membros disponível somente para líderes.
+React + Vite. Dashboard, ranking, relatórios quinzenais, avaliação e publicação por líderes, perfil e 12 avatares pixel art selecionáveis. Admins e avaliadores cadastram estudantes e admins; líderes cadastram estudantes de suas células.
 
 ## Desenvolvimento
 
