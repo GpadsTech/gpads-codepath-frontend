@@ -1,8 +1,9 @@
 import { auth } from "../firebase/firebaseConfig.js";
+import { normalizeApiUrl } from "./apiUrl.js";
 
 // URL base da API, vinda do arquivo .env (VITE_API_URL).
 // O Vite só expõe variáveis que começam com VITE_.
-const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000/api").replace(/\/$/, "");
+const BASE_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
 /**
  * Cliente HTTP central do frontend.
