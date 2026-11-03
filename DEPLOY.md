@@ -75,6 +75,13 @@ Alternativamente, render.yaml permite criar o serviço por Blueprint; preencha a
 
 ## 4. Frontend na Vercel
 
+Para este projeto, configure `VITE_API_URL=https://gpads-codepath-backend.onrender.com/api`.
+Não inclua espaços nem `/auth/me/` na variável. O cliente acrescenta a rota.
+Um espaço após `api` produz `/api%20/auth/me/`, que não existe no Django e retorna 404.
+Após corrigir a variável em Settings > Environment Variables, faça um novo deploy.
+No Render, configure `FRONTEND_URL=https://gpads-codepath.vercel.app` para liberar essa origem.
+A rota `/api/auth/me/` exige um token Firebase; abrir a URL sem autenticação não comprova o login.
+
 1. Add New > Project > conecte GpadsTech/gpads-codepath-frontend.
 2. Selecione Vite, Root Directory vazio, Node.js 22.x ou 24.x, Build Command npm run build, Output Directory dist.
 3. Em Settings > Git, configure a branch alternativa como Production Branch se quiser publicar esta versão como produção. Sem essa alteração, a Vercel pode gerar apenas um Preview Deployment.
