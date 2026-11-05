@@ -51,7 +51,7 @@ export function Login() {
                         />
                     </div>
 
-                    <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                    <div style={{ marginBottom: '25px', textAlign: 'left' }}>
                         <label style={{ fontSize: '14px', display: 'block', marginBottom: '5px' }}>Palavra-passe</label>
                         <input
                             type="password"
@@ -66,14 +66,50 @@ export function Login() {
                     <button 
                         type="submit" 
                         disabled={loading}
-                        style={{ width: '100%', padding: '12px', background: '#6c63ff', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}
+                        style={{ 
+                            width: '100%', 
+                            padding: '12px', 
+                            background: '#6c63ff', 
+                            color: '#fff', 
+                            border: '2px solid #8b83ff', 
+                            borderRadius: '4px', 
+                            fontWeight: 'bold', 
+                            cursor: 'pointer', 
+                            opacity: loading ? 0.7 : 1,
+                            boxSizing: 'border-box',
+                            transition: 'background 0.2s',
+                            marginTop: '5px'
+                        }}
                     >
                         {loading ? 'A ENTRAR...' : 'ENTRAR'}
                     </button>
                 </form>
+
+                <div style={{ marginTop: '20px', borderTop: '1px dashed #333357', paddingTop: '15px' }}>
+                    <a 
+                        href="#forgot-password" 
+                        style={{ 
+                            color: '#a0a0c0', 
+                            fontSize: '13px', 
+                            textDecoration: 'none',
+                            outline: 'none',
+                            padding: '2px 4px',
+                            display: 'inline-block'
+                        }}
+                        onFocus={(e) => {
+                            e.target.style.color = '#fff';
+                            e.target.style.border = '1px solid #ff6b6b';
+                            e.target.style.borderRadius = '4px';
+                        }}
+                        onBlur={(e) => {
+                            e.target.style.color = '#a0a0c0';
+                            e.target.style.border = 'none';
+                        }}
+                    >
+                        Esqueceu a senha?
+                    </a>
+                </div>
             </div>
         </div>
     );
 }
-
-export default Login;
