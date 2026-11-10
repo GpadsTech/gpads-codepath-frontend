@@ -41,13 +41,35 @@ export class UserService {
             throw erro;
         }
     }
-        // Busca o perfil do usuário logado (GET /auth/me/).
+    // Busca o perfil do usuário logado (GET /auth/me/).
     async getMe() {
         try {
             const data = await this.userRepository.getMe();
             return new User(data);
         } catch (erro) {
             console.error(erro);
+            throw erro;
+        }
+    }
+    // Adicionar dentro da classe UserService:
+
+    // Busca a lista de células para preencher as opções da tela de cadastro
+    async getCellOptions() {
+        try {
+            return await this.userRepository.getCells();
+        } catch (erro) {
+            console.error("Erro ao buscar opções de célula:", erro);
+            throw erro;
+        }
+    }
+
+    // Cria/Cadastra o usuário e retorna a entidade User criada
+    async registerUser(userData) {
+        try {
+            const data = await this.userRepository.createUser(userData);
+            return new User(data);
+        } catch (erro) {
+            console.error("Erro ao cadastrar usuário:", erro);
             throw erro;
         }
     }
