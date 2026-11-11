@@ -1,32 +1,77 @@
-import React, {useEffect, useState} from 'react';
-import {useAuth} from '../../hooks/useAuth';
-import {ApiClient} from '../../infrastructure/api/apiClient';
-const api=new ApiClient();
-const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-const empty=()=>({challengeId:'',description:'',report:'',code:'',reportDate:today()});
-const statuses={PENDING_EVALUATION:'Aguardando avaliação',EVALUATED:'Avaliado',REJECTED:'Revisão solicitada'};
-function Review({report,onChange,targets}) {
- const [feedback,setFeedback]=useState(''),[points,setPoints]=useState(50),[repository,setRepository]=useState(Object.keys(targets)[0] || ''),[folder,setFolder]=useState(Object.values(targets)[0]?.[0] || '');
- const [busy,setBusy]=useState(false),[error,setError]=useState('');
- const act=async(decision)=>{setBusy(true);setError('');try{const body=decision==='retry'?{}:decision==='reject'?{decision,feedback}:{decision,feedback,points:Number(points),repository,path:folder};const result=await api.post('/reports/'+report.id+(decision==='retry'?'/publish/':'/evaluate/'),body);onChange(result);if(result.github?.status==='GITHUB_ERROR')setError('Avaliação salva; publicação pendente: '+result.github.error);}catch(e){setError(e.message);}finally{setBusy(false);}};
- return <div className="cp-review">{report.status==='PENDING_EVALUATION' && <><label>Feedback ao estudante<textarea value={feedback} onChange={e=>setFeedback(e.target.value)} maxLength={10000}/></label><div className="cp-form-row"><label>Pontos (0 a 100)<input type="number" min="0" max="100" value={points} onChange={e=>setPoints(e.target.value)}/></label><label>Repositório autorizado<select value={repository} onChange={e=>{setRepository(e.target.value);setFolder(targets[e.target.value]?.[0] || '');}}><option value="">Selecione</option>{Object.keys(targets).map(r=><option key={r}>{r}</option>)}</select></label></div><label>Pasta base para as entregas<input value={folder} onChange={e=>setFolder(e.target.value)} placeholder="relatorios/celula"/></label><p className="cp-muted">O arquivo recebe o nome do autor e a data de envio: relatorio_quinzenal_nome_dd_mm_aaaa.md.</p><div className="cp-actions"><button disabled={busy || !repository || !folder || points==='' || Number(points)<0 || Number(points)>100} onClick={()=>act('approve')}>Aprovar e publicar</button><button className="cp-secondary" disabled={busy || !feedback.trim()} onClick={()=>act('reject')}>Solicitar revisão</button></div></>}{report.status==='EVALUATED' && report.github?.status!=='COMPLETED' && <button disabled={busy} onClick={()=>act('retry')}>Tentar publicação novamente</button>}<p role="alert">{error}</p></div>;
-}
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ApiClient } from '../../infrastructure/api/apiClient';
+import { useAuth } from '../../hooks/useAuth';
+
+const api = new ApiClient();
+
 export function Reports() {
- const {user}=useAuth();const leader=['leader','evaluator','admin'].includes(user?.role);
- const [reports,setReports]=useState([]),[challenges,setChallenges]=useState([]),[form,setForm]=useState(empty),[usage,setUsage]=useState(null),[editing,setEditing]=useState(null);
- const [selectedReport,setSelectedReport]=useState(null);
- const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
- const change=(key,value)=>setForm(prev=>({...prev,[key]:value}));
- const refreshUsage=()=>api.get('/ai/report/').then(setUsage).catch(()=>{});
- useEffect(()=>{let active=true;Promise.all([api.get('/reports/'),api.get('/challenges/')]).then(([r,c])=>{if(active){setReports(r);setChallenges(c);}}).catch(e=>active&&setError(e.message)).finally(()=>active&&setLoading(false));if(!leader)refreshUsage();return()=>{active=false;};},[user?.id,leader]);
- const update=r=>setReports(prev=>prev.map(x=>x.id===r.id?r:x));
- const send=async e=>{e.preventDefault();setBusy(true);setError('');setMessage('');try{const body={...form};if(editing)delete body.challengeId;const r=await api.post(editing?'/reports/'+editing+'/resubmit/':'/reports/',body);if(editing)update(r);else setReports(prev=>[r,...prev]);setEditing(null);setForm(empty());setMessage('Entrega enviada ao líder da sua célula.');}catch(e){setError(e.message);}finally{setBusy(false);}};
- const generate=async()=>{setBusy(true);setError('');setMessage('');try{const result=await api.post('/ai/report/',{activities:form.description,code:form.code.slice(0,30000)});change('report',result.report);setUsage(result.usage);setMessage('Rascunho gerado. Revise o texto antes de enviar.');}catch(e){setError(e.message);}finally{setBusy(false);refreshUsage();}};
- return <div className="cp-page"><p className="cp-eyebrow">ACOMPANHAMENTO · QUINZENA</p><h2>{leader?'Entregas da sua célula':'Relatórios de progresso'}</h2><p className="cp-muted">{leader?'Avalie, responda e publique as entregas no GitHub.':'Registre o que você construiu e receba feedback do seu líder.'}</p>
- <div className="cp-stats">{[['Entregas',reports.length],['Em avaliação',reports.filter(r=>r.status==='PENDING_EVALUATION').length],['Avaliadas',reports.filter(r=>r.status==='EVALUATED').length]].map(([label,value])=><div className="cp-panel" key={label}><span className="cp-muted">{label}</span><strong>{value}</strong></div>)}</div>
- {error&&<p className="cp-notice" role="alert">{error}</p>}{message&&<p className="cp-notice" role="status">{message}</p>}
- {!leader&&<section className="cp-panel"><h3>{editing?'Revisar entrega':'Nova entrega quinzenal'}</h3><form onSubmit={send} className="cp-form"><div className="cp-form-row"><label>Desafio<select aria-label="Desafio" required disabled={!!editing} value={form.challengeId} onChange={e=>change('challengeId',e.target.value)}><option value="">Selecione o desafio</option>{challenges.filter(c=>c.status==='active' || c.id===form.challengeId).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label><label>Data de construção<input required type="date" max={today()} value={form.reportDate} onChange={e=>change('reportDate',e.target.value)}/></label></div>
- <label>Atividades realizadas<textarea required rows={3} maxLength={2000} value={form.description} onChange={e=>change('description',e.target.value)} placeholder="O que você construiu, aprendeu e quais dificuldades encontrou?"/></label><label>Código ou link do repositório<textarea rows={4} maxLength={200000} value={form.code} onChange={e=>change('code',e.target.value)} placeholder="Cole seu código ou o link para a versão entregue"/></label><div className="cp-ai"><div><strong>Uma ajuda para organizar suas ideias</strong><p className="cp-muted">{usage?usage.remaining+' de 2 consultas disponíveis hoje':'Até 2 consultas por dia'}. Tentativas com falha contam na cota.</p></div><button type="button" className="cp-secondary" disabled={busy || !form.description.trim() || usage?.remaining===0} onClick={generate}>✦ Gerar com IA</button></div><label>Relatório (Markdown)<textarea rows={9} maxLength={200000} value={form.report} onChange={e=>change('report',e.target.value)} placeholder="Escreva seu relatório ou revise o rascunho da IA"/></label><div className="cp-actions"><button disabled={busy || (!form.report.trim()&&!form.code.trim())}>{busy?'Processando...':'Enviar ao líder'}</button>{editing&&<button type="button" className="cp-secondary" onClick={()=>{setEditing(null);setForm(empty());}}>Cancelar revisão</button>}</div></form></section>}
- <section className="cp-panel"><h3>{leader?'Pendências da célula':'Minhas entregas'}</h3>{leader&&<div className="cp-quest-grid">{reports.map(r=><div className={'cp-quest-card '+(r.id===selectedReport?'is-active':'')} key={r.id}><svg width="44" height="36" viewBox="0 0 44 36" shapeRendering="crispEdges" aria-hidden="true"><path d="M2 6H18V10H40V32H2Z" fill="#a13275"/><path d="M2 12H42V32H2Z" fill="#ef78bc"/><path d="M4 10H18V12H4Z" fill="#ffc0e2"/><path d="M26 22H42V36H26Z" fill="#d9e2ee"/><path d="M29 26H39V28H29ZM29 30H36V32H29Z" fill="#7b8aa1"/></svg><strong>{r.studentName || r.github?.authorName || r.studentId}</strong><span className="cp-badge">{statuses[r.status] || r.status}</span><button className="cp-secondary" onClick={()=>setSelectedReport(r.id)}>Inspecionar</button></div>)}</div>}{leader&&selectedReport&&<button className="cp-secondary cp-back-button" onClick={()=>setSelectedReport(null)}>← Voltar às pendências</button>}{loading?<p>Carregando entregas...</p>:reports.length===0?<p className="cp-muted">Nenhuma entrega por aqui ainda.</p>:reports.filter(r=>!leader||r.id===selectedReport).map(r=><article className={'cp-report '+(leader?'cp-inspection':'')} key={r.id}><div className="cp-report-heading"><div><small className="cp-muted">{leader?'Estudante: '+(r.studentName || r.github?.authorName || r.studentId)+' · ':''}{r.reportDate || r.submittedAt?.slice(0,10)}</small><h4>{r.description}</h4></div><span className="cp-badge">{statuses[r.status] || r.status}</span></div><details open={leader||undefined}><summary>{leader?'Dados da quest':'Ver relatório e código'}</summary><pre>{r.report}</pre><pre>{r.code}</pre></details>{r.evaluation&&<div className="cp-feedback"><strong>Feedback do líder</strong><p>{r.evaluation.feedback || 'Sem observações.'}</p>{r.evaluation.points!==undefined&&<small>{r.evaluation.points} pontos</small>}</div>}{r.github&&<p className="cp-muted">GitHub: {r.github.status==='COMPLETED'?'Publicado':r.github.status} · {r.github.repository}</p>}{r.github?.files?.map(file=><a key={file.path} href={file.url} target="_blank" rel="noreferrer">{file.path}</a>)}{leader?<Review report={r} onChange={update} targets={user?.publicationTargets || {}}/>:r.status==='REJECTED'&&<button className="cp-secondary" onClick={()=>{setEditing(r.id);setForm({challengeId:r.challengeId,description:r.description,report:r.report,code:r.code,reportDate:r.reportDate || r.submittedAt.slice(0,10)});window.scrollTo({top:0,behavior:'smooth'});}}>Revisar e reenviar</button>}</article>)}</section></div>;
+  const { user } = useAuth();
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    api.get('/reports/')
+      .then((data) => {
+        if (active) {
+          // Garante que se a API retornar algo inesperado, tratamos como array
+          setReports(Array.isArray(data) ? data : data?.results || []);
+        }
+      })
+      .catch((err) => {
+        if (active) setError(err.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Variável segura para evitar erros de leitura antes dos dados chegarem
+  const reportsList = Array.isArray(reports) ? reports : [];
+
+  return (
+    <div className="cp-page">
+      <div className="cp-welcome">
+        <div>
+          <h2>Relatórios e Entregas</h2>
+          <p className="cp-muted">Acompanhe o status das suas submissões e avaliações.</p>
+        </div>
+        <Link className="cp-link" to="/dashboard">← Voltar ao Dashboard</Link>
+      </div>
+
+      {error && <p role="alert" className="cp-notice">{error}</p>}
+      {loading && <p className="cp-muted">Carregando relatórios...</p>}
+
+      {!loading && (
+        <section className="cp-panel cp-accent-blue" style={{ marginTop: '1.5rem' }}>
+          <h3><span>📋</span> Histórico de Envios</h3>
+          
+          {reportsList.length === 0 ? (
+            <p className="cp-muted" style={{ marginTop: '1rem' }}>
+              Nenhum relatório encontrado ou enviado até o momento.
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem' }}>
+              {reportsList.map((report, index) => (
+                <div key={report.id || index} style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                  <strong>{report.title || `Entrega #${index + 1}`}</strong>
+                  <p className="cp-muted" style={{ fontSize: '0.9rem', marginTop: '0.3rem' }}>
+                    Status: {report.status || 'Em análise'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
 }
+
 export default Reports;
