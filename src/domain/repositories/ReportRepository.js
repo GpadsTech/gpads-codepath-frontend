@@ -12,4 +12,8 @@ export class ReportRepository {
     async getAll() {
         throw new Error("Método getAll não implementado.");
     }
+    async getReports() {
+        // Mudar de "/report/" para "/reports/" (com 's' no final)
+        return await this.client.get("/reports/");
+    }
 }

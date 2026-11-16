@@ -77,4 +77,7 @@ export class ApiClient {
     patch(path, body) {
         return this.request("PATCH", path, body);
     }
+    put(path, body) {
+        return this.request("PUT", path, body);
+    }
 }

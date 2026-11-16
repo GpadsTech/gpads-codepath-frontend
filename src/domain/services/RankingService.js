@@ -36,4 +36,23 @@ export class RankingService {
       new Ranking({ ...item, position: item.position ?? index + 1 })
     );
   }
+  async getRanking(period = "all") {
+    const list = await this.rankingRepository.getRanking(period);
+
+    // 1º Nível | 2º Pontos | 3º Nome em Ordem Alfabética (A-Z)
+    const sorted = [...list].sort((a, b) => {
+      if ((b.level || 0) !== (a.level || 0)) {
+        return (b.level || 0) - (a.level || 0);
+      }
+      if ((b.points || 0) !== (a.points || 0)) {
+        return (b.points || 0) - (a.points || 0);
+      }
+      return (a.name || "").localeCompare(b.name || "", "pt-BR");
+    });
+
+    // Reatribui posições ordinais (1, 2, 3...) sem repetição errada
+    return sorted.map((item, index) =>
+      new Ranking({ ...item, position: index + 1 })
+    );
+  }
 }
